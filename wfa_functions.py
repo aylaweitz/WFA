@@ -1,6 +1,30 @@
 import numpy as np
 from tqdm import tqdm
+from dataclasses import dataclass, field
 
+@dataclass
+class SpectralLine:
+    name: str
+    g_los: float        # LOS Landé factor
+    g_trans: float     # transverse Landé factor
+    lambda0: float     # central wavelength [angstrom]
+    lambdaB: float = 4.66*10**(-13)           # ?
+
+    C_par: float = field(init=False)
+    C_trans: float = field(init=False)
+
+    def __post_init__(self):
+        self.C_par = self.lambdaB * self.lambda0**2 * self.g_los
+        self.C_trans = (self.lambdaB * self.lambda0**2)**2 * self.g_trans
+        
+
+
+Ca_II_8542 = SpectralLine(
+    name = "Ca II 8542",
+    g_los = 1.10,
+    g_trans = 1.18,
+    lambda0 = 8542
+)
 
 
 def find_lambda_0(data, wavelengths):
