@@ -8,7 +8,7 @@ class SpectralLine:
     g_los: float        # LOS Landé factor
     g_trans: float     # transverse Landé factor
     lambda0: float     # central wavelength [angstrom]
-    lambdaB: float = 4.66*10**(-13)           # ?
+    lambdaB: float     # zeeman splitting
 
     C_par: float = field(init=False)
     C_trans: float = field(init=False)
@@ -19,11 +19,28 @@ class SpectralLine:
         
 
 
-Ca_II_8542 = SpectralLine(
+CaII_8542 = SpectralLine(
     name = "Ca II 8542",
     g_los = 1.10,
     g_trans = 1.18,
-    lambda0 = 8542
+    lambda0 = 8542,
+    lambdaB = 4.66*10**(-13)
+)
+
+NaI_D1_5896 = SpectralLine(
+    name = "Na I D1 5896",
+    g_los = None, # https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
+    g_trans = None, #?
+    lambda0 = 5896,
+    lambdaB = None # ?
+)
+
+FeI_6302 = SpectralLine(
+    name = "Fe I 6302",
+    g_los = 1.667, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
+    g_trans = None, #?
+    lambda0 = 6302,
+    lambdaB = None # ?
 )
 
 
@@ -48,11 +65,11 @@ def find_lambda_0(data, wavelengths):
 
 
 ###### WFA -- for just Ca II right now
-g = 1.1
-l0 = 8452
-C = 4.66*10**(-13) * g * l0**2
+# g = 1.1
+# l0 = 8452
+# C = 4.66*10**(-13) * g * l0**2
 
-def compute_B_parallel(wavelengths, I, V, C, lambda_range):
+def compute_B_parallel(wavelengths, I, V, lambda_range, line):
     """
     Compute B_parallel from arrays wave (wavelength), I(lambda), V(lambda) and constant C:
         B = - sum(dI/dλ * V) / ( C * sum( (dI/dλ)**2 ) )
@@ -80,12 +97,12 @@ def compute_B_parallel(wavelengths, I, V, C, lambda_range):
             V_sel = np.asarray(V[mask, x, y], dtype=float)
         
             # numerical derivative
-            dIdl = np.gradient(I_sel, wavelengths, axis=0)
+            dIdl = np.gradient(I_sel, wave, axis=0) # changed from 'wavelengths' to 'wave'
             
             numerator = np.sum(dIdl * V_sel, axis=0)
             denominator = np.sum((dIdl**2), axis=0)
         
-            B_par_val = - numerator / (C * denominator)
+            B_par_val = - numerator / (line.C_par * denominator)
 
             B_par[x,y] = B_par_val
 
@@ -97,18 +114,17 @@ def compute_B_parallel(wavelengths, I, V, C, lambda_range):
 
 
 # for transverse field
-l0 = 8542.1
-G = 1.18
-# CT = (4.6686 * 10**(-10) * l0**2)**2 * G
-CT = (4.67e-13*l0**2)**2*G
+# l0 = 8542.1
+# G = 1.18
+# # CT = (4.6686 * 10**(-10) * l0**2)**2 * G
+# CT = (4.67e-13*l0**2)**2*G
 
 def compute_B_perp(wavelengths,
                    I,
                    Q,
                    U,
                    V,
-                   C_perp = CT,
-                   lambda_0=l0,
+                   line,
                    lambda_range=(-0.4, -0.1)
                   ):
     """
@@ -153,7 +169,7 @@ def compute_B_perp(wavelengths,
             abs_inv = np.abs(1 / (lam_sel - lambda_0))#[:, None, None]
             abs_dI = np.abs(dI_sel)
         
-            numerator = (4/3) * (1/ C_perp) * np.sum(L_sel * abs_inv * abs_dI)#, axis=0)
+            numerator = (4/3) * (1/ line.C_perp) * np.sum(L_sel * abs_inv * abs_dI)#, axis=0)
             denominator = np.sum(abs_inv**2 * abs_dI**2)#, axis=0)
         
             B_perp_val = np.sqrt(numerator / denominator)
@@ -167,6 +183,7 @@ def compute_B_perp(wavelengths,
 
 
 
+# pretty sure involved no info about the spectral line itself -- only Q, U ratio
 def compute_azimuth(wavelengths,
                     I,
                     Q,
@@ -197,7 +214,7 @@ def compute_azimuth(wavelengths,
     
             mask = (offset >= lambda_min) & (offset <= lambda_max)
 
-            lam_sel = wavelengths[mask]
+            # lam_sel = wavelengths[mask]
             Q_sel = Q[mask, x, y]
             U_sel = U[mask, x, y]
 
