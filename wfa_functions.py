@@ -89,7 +89,7 @@ def compute_B_parallel(wavelengths, I, V, lambda_range, line):
             lambda_min = np.min(lambda_range)
             lambda_max = np.max(lambda_range)
 
-            print(lambda_min, lambda_max)
+            # print(lambda_min, lambda_max)
     
             mask = (offset >= lambda_min) & (offset <= lambda_max)
 
@@ -162,7 +162,7 @@ def compute_B_perp(wavelengths,
             lambda_min = np.min(lambda_range)
             lambda_max = np.max(lambda_range)
 
-            print(lambda_min, lambda_max)
+            # print(lambda_min, lambda_max)
     
             mask = (offset >= lambda_min) & (offset <= lambda_max)
     
