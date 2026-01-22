@@ -29,18 +29,18 @@ CaII_8542 = SpectralLine(
 
 NaI_D1_5896 = SpectralLine(
     name = "Na I D1 5896",
-    g_los = None, # https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
-    g_trans = None, #?
+    g_los = 0, # https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
+    g_trans = 0, #?
     lambda0 = 5896,
-    lambdaB = None # ?
+    lambdaB = 0 # ?
 )
 
 FeI_6302 = SpectralLine(
     name = "Fe I 6302",
     g_los = 1.667, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
-    g_trans = None, #?
+    g_trans = 0, #?
     lambda0 = 6302,
-    lambdaB = None # ?
+    lambdaB = 0 # ?
 )
 
 
