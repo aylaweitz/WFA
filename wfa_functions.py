@@ -173,7 +173,7 @@ def compute_B_perp(wavelengths,
             abs_inv = np.abs(1 / (lam_sel - lambda_0))#[:, None, None]
             abs_dI = np.abs(dI_sel)
         
-            numerator = (4/3) * (1/ line.C_perp) * np.sum(L_sel * abs_inv * abs_dI)#, axis=0)
+            numerator = (4/3) * (1/ line.C_trans) * np.sum(L_sel * abs_inv * abs_dI)#, axis=0)
             denominator = np.sum(abs_inv**2 * abs_dI**2)#, axis=0)
         
             B_perp_val = np.sqrt(numerator / denominator)
