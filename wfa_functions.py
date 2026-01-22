@@ -224,7 +224,7 @@ def compute_azimuth(wavelengths,
             Q_sel = Q[mask, x, y]
             U_sel = U[mask, x, y]
 
-            azimuth_val = 1/2 * np.atan2(np.sum(U_sel), np.sum(Q_sel)) # radians
+            azimuth_val = 1/2 * np.atan2(np.sum(np.abs(U_sel)), np.sum(np.abs(Q_sel))) # radians --- DO THE ABSOLUTE VALUE
             azimuth_deg = np.rad2deg(azimuth_val)
 
             azimuth[x,y] = azimuth_deg
