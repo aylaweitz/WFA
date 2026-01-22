@@ -113,10 +113,10 @@ def along_slit_correction(caii_data, KERNEL=55): # smoothing by ??
         v = caii_data[3, wave, :, :]
 
         # for each corresponding wavelength, subtract off the smoothed correction
-        subtracted_i = i / smoothed_i[wave, :].reshape(...) # transpose/flip the last 2 axes (spatial)
-        subtracted_q = q - smoothed_q[wave, :]
-        subtracted_u = u - smoothed_u[wave, :]
-        subtracted_v = v - smoothed_v[wave, :]
+        subtracted_i = i / smoothed_i[wave, :, None] # transpose/flip the last 2 axes (spatial)
+        subtracted_q = q - smoothed_q[wave, :, None]
+        subtracted_u = u - smoothed_u[wave, :, None]
+        subtracted_v = v - smoothed_v[wave, :, None]
     
         # add to new corrected data array
         caii_new[0, wave] = subtracted_i 
