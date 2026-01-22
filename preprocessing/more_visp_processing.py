@@ -66,7 +66,7 @@ def across_slit_correction(caii_data, KERNEL=55): # smoothing by 1 angstrom
 ##########################################################
 
 
-def along_slit_correction(caii_data, KERNEL=55): # smoothing by ??
+def along_slit_correction(caii_data, KERNEL=55): # smoothing by 1 angstrom
 
     caii_new = np.empty(caii_data.shape) # stokes, wave, scan direction, slit direction
     means = np.empty((4, caii_data.shape[1], caii_data.shape[2]))
