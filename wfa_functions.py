@@ -126,8 +126,8 @@ def compute_B_perp(wavelengths,
                    Q,
                    U,
                    V,
-                   line,
-                   lambda_range=(-0.4, -0.1)
+                   lambda_range=(-0.4, -0.1),
+                   line=CaII_8542
                   ):
     """
     Compute B_perp from discrete wavelength & intensity arrays according to:
@@ -216,7 +216,7 @@ def compute_azimuth(wavelengths,
             lambda_min = np.min(lambda_range)
             lambda_max = np.max(lambda_range)
 
-            print(lambda_min, lambda_max)
+            # print(lambda_min, lambda_max)
     
             mask = (offset >= lambda_min) & (offset <= lambda_max)
 
