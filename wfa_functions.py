@@ -8,7 +8,10 @@ class SpectralLine:
     g_los: float        # LOS Landé factor
     g_trans: float     # transverse Landé factor
     lambda0: float     # central wavelength [angstrom]
-    lambdaB: float     # zeeman splitting
+    # lambdaB: float 
+
+    def __init__(self):
+        self.lambdaB = 4.6686*10**(-13) # [Å] zeeman splitting coeff -- polarization of spectral lines (3.14)
 
     C_par: float = field(init=False)
     C_trans: float = field(init=False)
@@ -23,16 +26,16 @@ CaII_8542 = SpectralLine(
     name = "Ca II 8542", ## all parameters from Centeno 2018 https://ui.adsabs.harvard.edu/abs/2018ApJ...866...89C/abstract 
     g_los = 1.10,
     g_trans = 1.18,
-    lambda0 = 8542,
-    lambdaB = 4.6686*10**(-13)
+    lambda0 = 8542
+    # lambdaB = 4.6686*10**(-13) # ma
 )
 
 NaI_D1_5896 = SpectralLine(
     name = "Na I D1 5896",
     g_los = 1, # PLACEHOLDER 1 https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
     g_trans = 1, # PLACEHOLDER 1 metcalf 1995
-    lambda0 = 5896,
-    lambdaB = 4.6686*10**(-13)
+    lambda0 = 5896
+    # lambdaB = 4.6686*10**(-13)
 )
 
 FeI_6302 = SpectralLine(
@@ -40,7 +43,7 @@ FeI_6302 = SpectralLine(
     g_los = 1.667, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
     g_trans = 1, # PLACEHOLDER 1 check out https://pubs.aip.org/aip/jpr/article/4/2/353/242018/Energy-levels-of-iron-Fe-I-through-Fe-XXVI 
     lambda0 = 6302,
-    lambdaB = 4.6686*10**(-13)
+    # lambdaB = 4.6686*10**(-13)
 )
 
 
