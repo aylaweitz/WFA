@@ -38,16 +38,16 @@ NaI_D1_5896 = SpectralLine(
     # lambdaB = 4.6686*10**(-13)
 )
 
-FeI_6302 = SpectralLine(
+FeI_6302 = SpectralLine( # lets use 6302 line
     name = "Fe I 6302",
-    g_los = 1.667, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
+    g_los = 2.5, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
     g_trans = 1, # PLACEHOLDER 1 check out https://pubs.aip.org/aip/jpr/article/4/2/353/242018/Energy-levels-of-iron-Fe-I-through-Fe-XXVI 
-    lambda0 = 6302,
+    lambda0 = 6302
     # lambdaB = 4.6686*10**(-13)
 )
 
 
-def find_lambda_0(data, wavelengths):
+def find_lambda_0(data, wavelengths): ### extra param so incorporates wave range to search
     """
     Find the minimum of the line core separately for each spatial position.
 
@@ -66,11 +66,6 @@ def find_lambda_0(data, wavelengths):
 
     return wavelengths[slice_min_index]
 
-
-###### WFA -- for just Ca II right now
-# g = 1.1
-# l0 = 8452
-# C = 4.66*10**(-13) * g * l0**2
 
 def compute_B_parallel(wavelengths, I, V, lambda_range, line):
     """
@@ -113,16 +108,6 @@ def compute_B_parallel(wavelengths, I, V, lambda_range, line):
 
     return B_par
 
-
-
-
-
-
-# for transverse field
-# l0 = 8542.1
-# G = 1.18
-# # CT = (4.6686 * 10**(-10) * l0**2)**2 * G
-# CT = (4.67e-13*l0**2)**2*G
 
 def compute_B_perp(wavelengths,
                    I,
@@ -189,8 +174,7 @@ def compute_B_perp(wavelengths,
     return B_perp
 
 
-
-# pretty sure involved no info about the spectral line itself -- only Q, U ratio
+# pretty sure involves no info about the spectral line itself -- only Q, U ratio
 def compute_azimuth(wavelengths,
                     I,
                     Q,
@@ -233,5 +217,3 @@ def compute_azimuth(wavelengths,
             azimuth[x,y] = azimuth_deg
 
     return azimuth
-
-    
