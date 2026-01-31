@@ -27,7 +27,6 @@ CaII_8542 = SpectralLine(
     g_los = 1.10,
     g_trans = 1.18,
     lambda0 = 8542
-    # lambdaB = 4.6686*10**(-13) # ma
 )
 
 NaI_D1_5896 = SpectralLine(
@@ -35,7 +34,6 @@ NaI_D1_5896 = SpectralLine(
     g_los = 1, # PLACEHOLDER 1 https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
     g_trans = 1, # PLACEHOLDER 1 metcalf 1995
     lambda0 = 5896
-    # lambdaB = 4.6686*10**(-13)
 )
 
 FeI_6302 = SpectralLine( # lets use 6302 line
@@ -43,7 +41,6 @@ FeI_6302 = SpectralLine( # lets use 6302 line
     g_los = 2.5, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
     g_trans = 1, # PLACEHOLDER 1 check out https://pubs.aip.org/aip/jpr/article/4/2/353/242018/Energy-levels-of-iron-Fe-I-through-Fe-XXVI 
     lambda0 = 6302
-    # lambdaB = 4.6686*10**(-13)
 )
 
 
