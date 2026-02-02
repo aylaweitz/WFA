@@ -5,10 +5,13 @@ from dataclasses import dataclass, field
 @dataclass
 class SpectralLine:
     name: str
-    g_los: float        # LOS Landé factor
-    g_trans: float     # transverse Landé factor
-    lambda0: float     # central wavelength [angstrom]
-    # lambdaB: float 
+    g_los: float                    # LOS Landé factor
+    g_trans: float                  # transverse Landé factor
+    lambda0: float                  # central wavelength [angstrom]
+    wave_min_search_range: float    # range of wavelengths to search for line core
+    lambda_range_los: tuple         # wavelength range to consider for los b field calculation [angstrom from line core]
+    lambda_range_perp: tuple        # wavelength range to consider for transverse b field calculation [angstrom from line core]
+
 
     def __init__(self):
         self.lambdaB = 4.6686*10**(-13) # [Å] zeeman splitting coeff -- polarization of spectral lines (3.14)
@@ -17,7 +20,7 @@ class SpectralLine:
     C_trans: float = field(init=False)
 
     def __post_init__(self):
-        self.C_par = self.lambdaB * self.lambda0**2 * self.g_los
+        self.C_par = self.lambdaB * self.lambda0**2 * self.g_los # should this change with where the line core is at each position?
         self.C_trans = (self.lambdaB * self.lambda0**2)**2 * self.g_trans
         
 
@@ -26,45 +29,73 @@ CaII_8542 = SpectralLine(
     name = "Ca II 8542", ## all parameters from Centeno 2018 https://ui.adsabs.harvard.edu/abs/2018ApJ...866...89C/abstract 
     g_los = 1.10,
     g_trans = 1.18,
-    lambda0 = 8542
+    lambda0 = 8542,
+    wave_min_search_range = (8544.0, 8545.0),
+    lambda_range_los = (-0.25, 0.25),
+    lambda_range_perp = (-0.4, -0.1)
 )
 
 NaI_D1_5896 = SpectralLine(
     name = "Na I D1 5896",
-    g_los = 1, # PLACEHOLDER 1 https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
-    g_trans = 1, # PLACEHOLDER 1 metcalf 1995
-    lambda0 = 5896
+    g_los = 1.1, # PLACEHOLDER 1 https://steck.us/alkalidata/sodiumnumbers.1.6.pdf 
+    g_trans = 1.1, # PLACEHOLDER 1 metcalf 1995
+    lambda0 = 5896,
+    wave_min_search_range = (5895.0, 5897.0),
+    lambda_range_los = (-0.25, 0.25),
+    lambda_range_perp = (-0.25, -0.1)
 )
 
 FeI_6302 = SpectralLine( # lets use 6302 line
     name = "Fe I 6302",
     g_los = 2.5, # (g = 1.667 for Fe i 6301.5 Å, g = 2.5 for Fe i 6302.5 Å) -- https://www.aanda.org/articles/aa/pdf/2010/09/aa13972-09.pdf 
     g_trans = 1, # PLACEHOLDER 1 check out https://pubs.aip.org/aip/jpr/article/4/2/353/242018/Energy-levels-of-iron-Fe-I-through-Fe-XXVI 
-    lambda0 = 6302
+    lambda0 = 6302,
+    wave_min_search_range = (6302.25, 6302.75),
+    lambda_range_los = (-0.25, 0.25),
+    lambda_range_perp = (-0.25, -0.1)
 )
 
 
-def find_lambda_0(data, wavelengths): ### extra param so incorporates wave range to search
+def find_lambda_0(data, wavelengths, line):
     """
-    Find the minimum of the line core separately for each spatial position.
+    Find the minimum of the line core separately for each spatial position,
+    searching only within a given wavelength range.
 
-    data can be:
-      - 2D (wavelength, x)
-      - 3D (wavelength, x, y)
-      - 4D (wavelength, x, y, …)
+    Parameters
+    ----------
+    data : ndarray
+        Shape (wavelength, x[, y, ...])
+    wavelengths : ndarray
+        1D array of wavelengths, length = wavelength axis of data
+    wave_range : tuple
+        (lambda_min, lambda_max)
 
-    Returns array λ₀ matching the spatial dimensions.
+    Returns
+    -------
+    lambda_0 : ndarray
+        Array of λ₀ matching the spatial dimensions of data.
     """
     data = np.asarray(data)
-    # i0, i1 = int(wave_range[0]), int(wave_range[1])
+    wavelengths = np.asarray(wavelengths)
 
-    # index of min along wavelength axis but only within slice
-    slice_min_index = np.argmin(data, axis=0)
+    # Create mask for wavelength range
+    mask = (wavelengths >= line.wave_min_search_range[0]) & (wavelengths <= line.wave_min_search_range[1])
 
-    return wavelengths[slice_min_index]
+    if not np.any(mask):
+        raise ValueError("No wavelengths found in the specified range.")
+
+    # Slice data and wavelengths
+    data_slice = data[mask, ...]
+    wavelengths_slice = wavelengths[mask]
+
+    # Index of minimum along wavelength axis (within range)
+    slice_min_index = np.argmin(data_slice, axis=0)
+
+    # Convert indices to actual wavelengths
+    return wavelengths_slice[slice_min_index]
 
 
-def compute_B_parallel(wavelengths, I, V, lambda_range, line):
+def compute_B_parallel(wavelengths, I, V, line):
     """
     Compute B_parallel from arrays wave (wavelength), I(lambda), V(lambda) and constant C:
         B = - sum(dI/dλ * V) / ( C * sum( (dI/dλ)**2 ) )
@@ -72,7 +103,7 @@ def compute_B_parallel(wavelengths, I, V, lambda_range, line):
 
     B_par = np.empty(I[0].shape)
 
-    center_positions = find_lambda_0(I, wavelengths)
+    center_positions = find_lambda_0(I, wavelengths, line)
     
     for x in tqdm(range(I[0].shape[0])): # deal with each spatial position seperately -- unique center position
         for y in range(I[0].shape[1]):
@@ -81,8 +112,8 @@ def compute_B_parallel(wavelengths, I, V, lambda_range, line):
 
             offset = wavelengths - lambda_0
     
-            lambda_min = np.min(lambda_range)
-            lambda_max = np.max(lambda_range)
+            lambda_min = np.min(line.lambda_range_los)
+            lambda_max = np.max(line.lambda_range_los)
 
             # print(lambda_min, lambda_max)
     
@@ -111,8 +142,7 @@ def compute_B_perp(wavelengths,
                    Q,
                    U,
                    V,
-                   lambda_range=(-0.4, -0.1),
-                   line=CaII_8542
+                   line
                   ):
     """
     Compute B_perp from discrete wavelength & intensity arrays according to:
@@ -124,7 +154,7 @@ def compute_B_perp(wavelengths,
 
     B_perp = np.empty(I[0].shape)
 
-    center_positions = find_lambda_0(I, wavelengths)
+    center_positions = find_lambda_0(I, wavelengths, line)
     
     for x in tqdm(range(I[0].shape[0])): # deal with each spatial position seperately -- unique center position
         for y in range(I[0].shape[1]):
@@ -144,8 +174,8 @@ def compute_B_perp(wavelengths,
             # Select points within desired offset range (e.g., -0.4 ≤ λ−λ₀ ≤ -0.1)
             offset = wavelengths - lambda_0
     
-            lambda_min = np.min(lambda_range)
-            lambda_max = np.max(lambda_range)
+            lambda_min = np.min(line.lambda_range_perp)
+            lambda_max = np.max(line.lambda_range_perp)
 
             # print(lambda_min, lambda_max)
     
@@ -176,13 +206,13 @@ def compute_azimuth(wavelengths,
                     I,
                     Q,
                     U,
-                    lambda_range=(-0.4, -0.1)
+                    line
                    ):
 
 
     azimuth = np.empty(I[0].shape)
 
-    center_positions = find_lambda_0(I, wavelengths)
+    center_positions = find_lambda_0(I, wavelengths, line)
     
     for x in tqdm(range(I[0].shape[0])): # deal with each spatial position seperately -- unique center position
         for y in range(I[0].shape[1]):
@@ -197,8 +227,8 @@ def compute_azimuth(wavelengths,
             # Select points within desired offset range (e.g., -0.4 ≤ λ−λ₀ ≤ -0.1)
             offset = wavelengths - lambda_0
     
-            lambda_min = np.min(lambda_range)
-            lambda_max = np.max(lambda_range)
+            lambda_min = np.min(line.lambda_range_perp)
+            lambda_max = np.max(line.lambda_range_perp)
 
             # print(lambda_min, lambda_max)
     
