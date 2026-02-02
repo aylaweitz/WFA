@@ -27,7 +27,7 @@ CaII_8542 = SpectralLine(
     g_los = 1.10,
     g_trans = 1.18,
     lambda0 = 8542,
-    wave_min_search_range = (8544.0, 8545.0),
+    wave_min_search_range = (8540.0, 8545.0),
     lambda_range_los = (-0.25, 0.25),
     lambda_range_perp = (-0.4, -0.1)
 )
