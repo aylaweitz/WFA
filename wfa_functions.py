@@ -12,14 +12,11 @@ class SpectralLine:
     lambda_range_los: tuple         # wavelength range to consider for los b field calculation [angstrom from line core]
     lambda_range_perp: tuple        # wavelength range to consider for transverse b field calculation [angstrom from line core]
 
-
-    def __init__(self):
-        self.lambdaB = 4.6686*10**(-13) # [Å] zeeman splitting coeff -- polarization of spectral lines (3.14)
-
     C_par: float = field(init=False)
     C_trans: float = field(init=False)
 
     def __post_init__(self):
+        self.lambdaB = 4.6686*10**(-13) # [Å] zeeman splitting coeff -- polarization of spectral lines (3.14)
         self.C_par = self.lambdaB * self.lambda0**2 * self.g_los # should this change with where the line core is at each position?
         self.C_trans = (self.lambdaB * self.lambda0**2)**2 * self.g_trans
         
