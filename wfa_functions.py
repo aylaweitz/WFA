@@ -38,8 +38,8 @@ NaI_D1_5896 = SpectralLine(
     g_trans = 1.1, # PLACEHOLDER 1 metcalf 1995
     lambda0 = 5896,
     wave_min_search_range = (5895.0, 5897.0),
-    lambda_range_los = (-0.25, 0.25),
-    lambda_range_perp = (-0.25, -0.1)
+    lambda_range_los = (-0.1, 0.1),
+    lambda_range_perp = (-0.2, -0.1)
 )
 
 FeI_6302 = SpectralLine( # lets use 6302 line
