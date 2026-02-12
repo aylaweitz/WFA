@@ -12,13 +12,13 @@ class SpectralLine:
     lambda_range_los: tuple         # wavelength range to consider for los b field calculation [angstrom from line core]
     lambda_range_perp: tuple        # wavelength range to consider for transverse b field calculation [angstrom from line core]
 
-    C_par: float = field(init=False)
-    C_trans: float = field(init=False)
+    # C_par: float = field(init=False)
+    # C_trans: float = field(init=False)
 
     def __post_init__(self):
         self.lambdaB = 4.6686*10**(-13) # [Å] zeeman splitting coeff -- polarization of spectral lines (3.14)
-        self.C_par = self.lambdaB * self.lambda0**2 * self.g_los # should this change with where the line core is at each position?
-        self.C_trans = (self.lambdaB * self.lambda0**2)**2 * self.g_trans
+        # self.C_par = self.lambdaB * self.lambda0**2 * self.g_los # should this change with where the line core is at each position?
+        # self.C_trans = (self.lambdaB * self.lambda0**2)**2 * self.g_trans
         
 
 
@@ -126,8 +126,11 @@ def compute_B_parallel(wavelengths, I, V, line):
             
             numerator = np.sum(dIdl * V_sel, axis=0)
             denominator = np.sum((dIdl**2), axis=0)
+
+            # changing constant based off of true wavelength instead of theoretical one
+            C_par = line.lambdaB * lambda_0**2 * line.g_los
         
-            B_par_val = - numerator / (line.C_par * denominator)
+            B_par_val = - numerator / (C_par * denominator)
 
             B_par[x,y] = B_par_val
 
@@ -184,8 +187,11 @@ def compute_B_perp(wavelengths,
         
             abs_inv = np.abs(1 / (lam_sel - lambda_0))#[:, None, None]
             abs_dI = np.abs(dI_sel)
+
+            # changing constant based off of true wavelength instead of theoretical one
+            C_trans = (line.lambdaB * lambda_0**2)**2 * line.g_trans
         
-            numerator = (4/3) * (1/ line.C_trans) * np.sum(L_sel * abs_inv * abs_dI)#, axis=0)
+            numerator = (4/3) * (1/ C_trans) * np.sum(L_sel * abs_inv * abs_dI)#, axis=0)
             denominator = np.sum(abs_inv**2 * abs_dI**2)#, axis=0)
         
             B_perp_val = np.sqrt(numerator / denominator)
